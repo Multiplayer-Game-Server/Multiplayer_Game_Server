@@ -3,10 +3,22 @@ import threading
 import json
 import time
 import random
+from enum import Enum
 from collections import defaultdict
 
 HOST = '0.0.0.0'
 PORT = 20250
+
+'''обсудить использование enum, а не текстовых определений'''
+class GameStates(Enum):
+    PLAYING = 0
+    WAITING = 1
+    FINISHED = 2
+
+class MessageType(Enum):
+    QUESTION = 0
+    ANSWER_RESULTS = 1
+    GAME_RESULT = 2
 
 class Game:
     def __init__(self, game_id):
@@ -20,6 +32,8 @@ class Game:
         self.scores = defaultdict(int) # player_id -> score
         self.questions = self.get_questions()
         self.lock = threading.Lock()
+        self.number_of_rounds = 5
+        self.delay_between_questions = 2 # Seconds
     
     
     def get_questions(self):
@@ -94,6 +108,59 @@ class Game:
                 self.handle_all_answered()
             
             return True
+        
+    def handle_all_answered(self):
+        """Handle when all players have answered"""
+        if self.current_round >= self.number_of_rounds:
+            self.end_game()
+        else:
+            score_table = self.get_result()
+            self.broadcast(json.dumps(score_table))
+            time.sleep(self.delay_between_questions)
+            self.next_round()
+
+    def get_result(self):
+        results = {
+            'type': 'game_results',
+            'scores': {p.id: self.scores[p] for p in self.players}
+        }
+        return results
+
+    def end_game(self):
+        """End the game and announce results"""
+        with self.lock:
+            print("Stop game and send results")
+            self.game_state = 'finished'
+            results = self.get_result()
+            self.broadcast(json.dumps(results))
+            self.close_connection_players(self.players)
+    
+    def close_connection_players(self, players):
+        for player in players:
+            print(f"Close connection: {player[1][0]}: {player[1][1]}")
+            player[0].close()
+
+    def broadcast(self, message):
+        """Send a message to all players"""
+        for player in self.players:
+            try:
+                print(f"Send message to {player[1][0]}: {player[1][1]}")
+                player.conn.send(message.encode())
+            except:
+                print(f"Can't send message to {player[1][0]}: {player[1][1]}")
+                self.handle_disconnect(player)
+    
+    def handle_disconnect(self, player):
+        """Handle a player disconnecting"""
+        """Надо будет рассмотреть этот метод позже"""
+        with self.lock:
+            if player in self.players:
+                print(f"Close connection: {player[1][0]}: {player[1][1]}")
+                self.players.remove(player)
+                player[0].close()
+                if self.game_state == 'playing':
+                    if len(self.players) < 1:
+                        self.end_game()
     
     
 
