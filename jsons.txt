@@ -1,0 +1,58 @@
+# от клиента, чтоб подключиться к комнате
+{
+    type: "connect"
+    game_id: int
+}
+
+# от клиента, чтоб создать команду
+{
+    type: "create"
+}
+
+# от сервера, когда ты в комнате и подключился другой игрок
+{
+    type: "new player"
+    player_id: int
+}
+
+# от сервера, когда клиент только подключился
+{
+    type: "status"
+    player_id: int (c 0)
+    game_id: int (Если == None, то такой комнаты не существует)
+    list_of_players: [int, ...]
+}
+
+# от клиента, чтоб начать игру
+{
+    type: "ready to start"
+}
+
+# от сервера, чтоб отправить вопрос
+{
+    type: "question"
+    round: int  (с 0 до 4)
+    question: srt
+    options: [str, str, str, str]
+}
+
+# от клиента, чтоб отправить ответ на вопрос
+{
+    type: "answer"
+    round: int (с 0 до 4)
+    answer: int (с 0 до 3)
+}
+
+# от сервера, чтоб отправить правильный ответ
+{
+    type: "correct answer"
+    correct_answ: str
+    your_res: bool (True если ответ правильный)
+    curr_score: [int, ...]
+}
+
+# от сервера, чтоб закончить игру
+{
+    type: "end game"
+    curr_score: [int, ...]
+}
