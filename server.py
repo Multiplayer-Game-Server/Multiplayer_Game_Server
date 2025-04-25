@@ -8,6 +8,14 @@ from collections import defaultdict
 HOST = '0.0.0.0'
 PORT = 20250
 
+#лучше создать класс игрока, но тогда надо совсем немного 
+# поменять пару строк в функциях 
+class Player:
+    def __init__(self, client_socket, client_addr):
+        self.socket = client_socket  # player's socket for communication
+        self.address = client_addr  # player's IP and port
+        self.answered = False  # Whether the player has answered the current question
+        self.score = 0  
 
 class Game:
     def __init__(self, game_id, player_socket):
@@ -38,7 +46,7 @@ class Game:
         pass
 
     def get_questions(self):
-        pass #will be implemented when the database will be
+        pass # will be implemented when the database will be
     
     def handlePlayerConnect(self, player):
         """Add a player to the game"""
@@ -71,6 +79,7 @@ class Game:
                 return
             
             self.current_round += 1
+            #загрузить сначала 5 рандомных вопросов и выводить их  в раундах
             self.current_question = random.choice(self.questions) #will change when the database will be
             self.answers_received = 0
             self.question_start_time = time.time()
@@ -91,43 +100,42 @@ class Game:
             'options': self.current_question['options']
         }
         self.broadcast(json.dumps(question_data))
-    
-    def process_answer(self, player, answer_index):
+
+    def process_answer(self, player, round_number, answer_index):
+        """Process a player's answer"""
         with self.lock:
             if self.game_state != 'playing' or self.current_question is None:
-                return False
+                return
+            
+            # Ensure the answer is for the current round
+            if round_number != self.current_round:
+                return
             
             # Ensure a player can only answer once per round
             if hasattr(player, 'answered') and player.answered:
-                return False
+                return
             player.answered = True  # Mark the player as having answered
             
             self.answers_received += 1
-            #response_time = time.time() - self.question_start_time
             
-            if answer_index == self.current_question['answer']:
-                points = 10
-                self.scores[player] += points
-                response = {
-                    'type': 'answer_result',
-                    'correct': True,
-                    'points': points,
-                    'total_score': self.scores[player]
-                }
-            else:
-                response = {
-                    'type': 'answer_result',
-                    'correct': False,
-                    'correct_answer': self.current_question['answer'],
-                    'total_score': self.scores[player]
-                }
+            # Check if the answer is correct
+            correct = answer_index == self.current_question['answer']
+            if correct:
+                self.scores[player] += 1  # Award points for a correct answer
             
-            player.conn.send(json.dumps(response).encode())
+            response = {
+                'type': 'correct answer',
+                'correct_answ': chr(65 + self.current_question['answer']),  # Convert index to letter (A, B, C, D)
+                'your_res': correct,
+                'curr_score': [self.scores[p] for p in self.players]
+            }
             
+            # Send the response to the player
+            player[0].send(json.dumps(response).encode())
+            
+            # Check if all players have answered
             if self.answers_received >= len(self.players):
                 self.handle_all_answered()
-            
-            return True
         
     def handle_all_answered(self):
         """Handle when all players have answered"""
@@ -282,16 +290,25 @@ class Server:
                 "list_of_players": list_players
             })
          
+         
+        #либо вынести обработку ответа и готов к игре в дргугую функцию
          #Handle if clinet ready to start the game   
         elif message['type'] == 'ready to start':
             game_id = message['game_id']
             game = self.games[game_id]
             game.handle_ready(player)
             answer = json.dumps({"type": "ready_acknowledged"})
+            
+        # Handle if client  answer the question
+        elif message['type'] == 'answer':
+            game_id = message['game_id']
+            game = self.games[game_id]
+            game.process_answer(player, message['round'], message['answer'])
+            
         else:
             answer = {"type": "Error"}
+    
         # Send response
-        # Отправляем ответ
         client_socket.send(answer.encode())
 
     def serve(self, host, port, max_num_player):
