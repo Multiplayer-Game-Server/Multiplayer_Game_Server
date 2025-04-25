@@ -55,5 +55,6 @@
 # от сервера, чтоб закончить игру
 {
     type: "end game"
+    winner : str
     curr_score: [int, ...]
 }
