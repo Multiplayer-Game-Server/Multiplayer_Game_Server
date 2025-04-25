@@ -8,6 +8,7 @@ from collections import defaultdict
 HOST = '0.0.0.0'
 PORT = 20250
 
+
 class Game:
     def __init__(self, game_id, player_socket):
         self.players_sockets = [player_socket]
@@ -39,31 +40,50 @@ class Game:
     def get_questions(self):
         pass #will be implemented when the database will be
     
-    def handlePlayerConnect(self, player): #add player to the game
+    def handlePlayerConnect(self, player):
+        """Add a player to the game"""
         with self.lock:
             self.players.append(player)
-            # if len(self.players) >= 2 and self.game_state == 'waiting':
-            #     self.start_game()
+            print(f"Player {player[1][0]}:{player[1][1]} joined game {self.id}.")
+    
+    def handle_ready(self, player):
+        """Mark a player as ready and start the game if all players are ready"""
+        with self.lock:
+            print(f"Player {player[1][0]}:{player[1][1]} is ready.")
+            self.ready_players += 1
+            if self.ready_players == len(self.players):
+                print(f"All players are ready. Starting game {self.id}.")
+                #self.broadcast(json.dumps({"type": "info", "message": "All players are ready. Starting the game!"}))
+                self.start_game()
     
     def start_game(self):
+        """Start the game"""
         with self.lock:
             self.game_state = 'playing'
+            print(f"Game {self.id} is starting!")
             self.next_round()
     
     def next_round(self):
+        """Move to the next round"""
         with self.lock:
+            if self.current_round >= self.number_of_rounds:
+                self.end_game()
+                return
+            
             self.current_round += 1
-            self.current_question = random.choice(self.questions)
+            self.current_question = random.choice(self.questions) #will change when the database will be
             self.answers_received = 0
             self.question_start_time = time.time()
             
             # Reset the answered flag for all players
             for player in self.players:
                 player.answered = False
-            
+                
+            print(f"Starting round {self.current_round} in game {self.id}.")
             self.broadcast_question()
     
-    def broadcast_question(self): #send the current question to all players
+    def broadcast_question(self): 
+        """Send the current question to all players"""
         question_data = {
             'type': 'question',
             'round': self.current_round,
@@ -129,10 +149,25 @@ class Game:
     def end_game(self):
         """End the game and announce results"""
         with self.lock:
-            print("Stop game and send results")
+            print(f"Game {self.id} is ending.")
             self.game_state = 'finished'
-            results = self.get_result()
+
+            # Determine the winner
+            winner = None
+            if self.scores:
+                winner = max(self.scores, key=self.scores.get)  # Player with the highest score
+
+            #  results
+            results = {
+                'type': 'end game',
+                'winner': f"{winner[1][0]}:{winner[1][1]}" if winner else "No winner",
+                'curr_score': [self.scores[player] for player in self.players]
+            }
+
+            # Broadcast the results to all players
             self.broadcast(json.dumps(results))
+
+            # Close all player connections
             self.close_connection_players(self.players)
     
     def close_connection_players(self, players):
@@ -163,7 +198,6 @@ class Game:
                         self.end_game()
     
     
-
 class Server:
     def __init__(self):
         self.games = {}
@@ -209,7 +243,6 @@ class Server:
         '''
         while True:
             # Pending connection of a new player  
-            # Ожидание подключения нового игрока
             client_socket, client_addr = self.server_socket.accept()
             client_thread = threading.Thread(
                 target=self.handle_client,
@@ -224,13 +257,11 @@ class Server:
         print(f"New connection from {client_addr[0]}: {client_addr[1]}")
 
         # Waiting for a request from the newly connected player
-        # Ожидание запроса от только что подключившегося игрока
         message = self.getMessage(client_socket)
         print(f"Got message from {client_addr[0]}: {client_addr[1]}:")
         print("-"*30, f"\n{message}\n", "-"*30)
 
         # Create a room and generate a reply to the player if there was a request to create a room 
-        # Создаем комнату и формируем ответ игроку.
         if (message['type'] == 'create'): 
             game_id, player_id = self.createGame(player)
             answer = json.dumps({
@@ -250,8 +281,13 @@ class Server:
                 "game_id": game_id,
                 "list_of_players": list_players
             })
-        # If an unknown request is received, generate an error response
-        # Если получен неизвестный запрос, формируем ответ об ошибке
+         
+         #Handle if clinet ready to start the game   
+        elif message['type'] == 'ready to start':
+            game_id = message['game_id']
+            game = self.games[game_id]
+            game.handle_ready(player)
+            answer = json.dumps({"type": "ready_acknowledged"})
         else:
             answer = {"type": "Error"}
         # Send response
