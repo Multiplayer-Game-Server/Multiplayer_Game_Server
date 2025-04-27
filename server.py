@@ -10,6 +10,7 @@ from typing import Dict
 HOST = '0.0.0.0'
 PORT = 20250
 
+
 #убрать у клиента + 1 к раунду
 # игра начинается сразу если подключенные игрко нажал что готов а другой не подсоединился
 # отсылать правильный ответ сразу или всем после того как все ответили
@@ -46,6 +47,7 @@ class Game:
         self.round_time_limit = 40
 
   
+
 
     def get_questions(self, num_questions=5):
         try:
@@ -454,3 +456,4 @@ class Server:
 if (__name__ == '__main__'):
     server = Server()
     server.serve(HOST, PORT, 10)
+
