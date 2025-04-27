@@ -157,33 +157,80 @@ class ClientEntity:
     
     def handle_correct_answer(self, data):
         print(f"\nПравильный ответ: {data['correct_answ']}")
-        print("Ваш результат: ", "Верно" if data["your_res"] else "Неверно")
+        
         print("Текущий счет:")
-        curr_score = {int(player_id): score for player_id, score in data["curr_score"].items()}
-        # ------------------------------------------------
-        for pid, score in curr_score.items():
-            print(f"Игрок {self.get_name(pid)}: {score} очков")
+        
+        # Check if curr_score is a list or dictionary and handle accordingly
+        if isinstance(data["curr_score"], list):
+            # If it's a list, assume your score is at your player index (usually 0 if you're the only player)
+            if len(data["curr_score"]) > 0:
+                print(f"Ваш счет: {data['curr_score'][0]} очков")
+        else:
+            # If it's a dictionary, find your score by player_id
+            for player_id_str, score in data["curr_score"].items():
+                player_id = int(player_id_str)
+                if player_id == self.player_id:
+                    print(f"Ваш счет: {score} очков")
+                    break
 
 
 
     def handle_end_game(self, data):
         print("\nИгра окончена!")
         print("Финальный счет:")
-        max_score = max(data["curr_score"])
-        curr_score = {int(player_id): score for player_id, score in data["curr_score"].items()}
-        winners = [i for i, score in curr_score.items() if score == max_score]   # ⭐️ проверить как эта строчка работает
         
-        for i, score in curr_score.items():                                  # ⭐️ сделать красивую табличку + измеить число на цвет
-            #print(f"Игрок {i}: {score} очков")  
-            # ⭐️ UPD (нужно проверить в каком порядке сервер отправляет результаты)
-            print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
-        
-        if len(winners) == 1:
-            print(f"Победил игрок {winners[0]}!")
+        # Check if curr_score is a list
+        if isinstance(data["curr_score"], list):
+            curr_score = data["curr_score"]
+            if curr_score:  # Check if the list is not empty
+                max_score = max(curr_score)
+                
+                # For simplicity, just show your score
+                if len(curr_score) > 0:
+                    print(f"Ваш финальный счет: {curr_score[0]} очков")
+                    
+                winners = [i for i, score in enumerate(curr_score) if score == max_score]
+                
+                if len(winners) == 1:
+                    if 0 in winners:  # Assumes you're player 0
+                        print("Поздравляем! Вы победили!")
+                    else:
+                        print("Победил другой игрок.")
+                else:
+                    if 0 in winners:  # Assumes you're player 0
+                        print("Ничья! Вы и другие игроки набрали одинаковое количество очков.")
+                    else:
+                        print("Ничья между другими игроками.")
+            else:
+                print("Нет данных о счете.")
         else:
-            print("Ничья между игроками:", ", ".join(map(str, winners)))
+            # Handle dictionary format (keeping this code for backward compatibility)
+            try:
+                curr_score = {int(player_id): score for player_id, score in data["curr_score"].items()}
+                max_score = max(curr_score.values()) if curr_score else 0
+                
+                for pid, score in curr_score.items():
+                    if pid == self.player_id:
+                        print(f"Ваш финальный счет: {score} очков")
+                        
+                winners = [pid for pid, score in curr_score.items() if score == max_score]
+                
+                if len(winners) == 1:
+                    if self.player_id in winners:
+                        print("Поздравляем! Вы победили!")
+                    else:
+                        print("Победил другой игрок.")
+                else:
+                    if self.player_id in winners:
+                        print("Ничья! Вы и другие игроки набрали одинаковое количество очков.")
+                    else:
+                        print("Ничья между другими игроками.")
+            except Exception as e:
+                print(f"Ошибка при обработке результатов: {e}")
         
         self.running = False
+            
+
 
     def receive_messages(self):
         while self.running:
@@ -204,15 +251,18 @@ class ClientEntity:
                 elif message["type"] == "end game":
                     self.handle_end_game(message)
                 
-            except json.JSONDecodeError:
-                print("Ошибка декодирования сообщения от сервера") # ⭐️ возможно надо отослать серверу?
-                print("-"*10, f"\n{message}\n", "-"*10)
+            except json.JSONDecodeError as e:
+                print(f"Ошибка декодирования сообщения от сервера: {e}")
+                # Don't try to print the message if it can't be decoded
+                print("-"*10, f"\nПолучены некорректные данные\n", "-"*10)
             except ConnectionResetError:
                 print("Соединение с сервером разорвано")
                 self.running = False
             except Exception as e:
                 print(f"Неизвестная ошибка: {e}")
-                print("-"*10, f"\n{message}\n", "-"*10)
+                # Only print the message if it has been successfully decoded
+                if 'message' in locals():
+                    print("-"*10, f"\n{message}\n", "-"*10)
                 self.running = False
 
     def cleanup(self):
