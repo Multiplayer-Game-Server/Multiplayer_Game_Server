@@ -1,11 +1,12 @@
 import json
 import socket
+import sys
 import threading
 import time
+import select
 
-# Изменить на действительные
-SERVER_HOST = 'localhost'
-SERVER_PORT = 20000
+SERVER_HOST = '127.0.0.1'
+SERVER_PORT = 20250
 
 class ClientEntity:
     def __init__(self):
@@ -17,7 +18,9 @@ class ClientEntity:
         self.answer_timer = None
         self.current_round = -1
         self.colours = ["RED", "GREEN", "BLUE", "YELLOW", "BLACK", "WHITE", "PINK", "ORANGE", "PURPLE", "BROWN", "GREY", "CYAN", "MAROON", "LIME", "OLIVE", "AQUA", "FUCHSIA", "INDIGO", "VIOLET", "MAGENTO"]
-        self.wait_answer = False
+        self.wait_ready = True
+        self.final_answer = None
+        self.last_answer = None
 
     def start(self):
         # ⭐️ UPD (TCP соединение)
@@ -32,12 +35,14 @@ class ClientEntity:
         print("1. Создать новую комнату")
         print("2. Присоединиться к существующей комнате")
 
+        # ⭐️ UPD (взял в цикл)
         while True:
             choice = input("Выберите действие: ").strip()
             if choice == "1":
                 self.create_game()
                 break
             elif choice == "2":
+                # ⭐️ DEL
                 self.join_game()
                 break
             else:
@@ -47,6 +52,7 @@ class ClientEntity:
         receiver_thread.daemon = True
         receiver_thread.start()
     
+    # ⭐️ NEW (функция, чтоб определить цвет игрока)
     def get_name(self, ip):
         return f"{self.colours[ip % len(self.colours)]}_{ip}"
 
@@ -56,6 +62,7 @@ class ClientEntity:
         print("Создаем новую комнату...")
 
     def join_game(self):
+        # ⭐️ UPD (пеперместил input)
         game_id = input("Введите ID комнаты: ").strip()
         message = {
             "type": "connect",
@@ -84,12 +91,32 @@ class ClientEntity:
             self.wait_for_ready()     # ⭐️ Непонятно будет ли он пока ждёт начала получать сообщения о новых игроках... (скорее всего все сообщения о новых игроках прийдут после нажатия "готов")
 
     def wait_for_ready(self):
-        # ⭐️ UPD (обновил способ отправки "ready")
-        wait = input("Нажмите ENTER когда будете готовы начать игру").strip()
-        
+        def receive_players():
+            while self.wait_ready:
+                data = self.sock.recv(8192)      # ⭐️ изменить буфер
+                if not data:
+                    break
+                message = json.loads(data.decode())
+                if message["type"] == "new player":
+                    self.handle_new_player(message)
+                elif message["type"] == "question":
+                    self.handle_question(message)
+                else:
+                    print("Вы попали сюда...")
+
+        self.wait_ready = True
+        thread = threading.Thread(target=receive_players)
+        thread.start()
+
+        input("Нажмите ENTER когда будете готовы начать игру").strip()
+
+        self.wait_ready = False
+
         message = {"type": "ready to start"}
         self.sock.send(json.dumps(message).encode())
-        print("Ожидаем других игроков...")
+        print("Ожидаем готовности других игроков...")
+
+        thread.join()  # Ждём завершения потока
 
     def handle_new_player(self, data):
         # ⭐️ NEW (Добавил игрока в список)
@@ -102,43 +129,46 @@ class ClientEntity:
         print(data["question"])
         for i, option in enumerate(data["options"]):            # ⭐️ проверить как эта строчка работает
             print(f"{i+1}. {option}")
-        
-        self.answer_timer = threading.Timer(10.0, self.send_timeout_answer)
-        self.answer_timer.start()
-        
-        # ⭐️ UPD (добавлена проверка на корректность ответа)
-        self.wait_answer = True
-        while self.wait_answer:
-            answer = input("Ваш ответ (1-4): ").strip()
-            if answer in ["1", "2", "3", "4"]:
-                self.wait_answer = False
-            else:
-                # ⭐️ UPD (чтоб формулировка одновременно подходила и под неправильный ввод и под окончание времени)
-                print("Ответ не будет засчитан")    
 
-        # ⭐️ UPD (добавил проверку, чтоб если чел "застрянет" в input и пока находится в нём сервер перейдёт на следующий раунд — не отправил ответ)
-        if self.current_round != -1:
-            self.send_answer(answer)
+        self.final_answer = None
+
+        def input_thread():
+            print("Ваш ответ (1-4):")
+
+            rlist, _, _ = select.select([sys.stdin], [], [], 30.0)
+    
+            if not rlist:  # ⭐️ Если время вышло
+                print("\nВремя вышло! Ответ не принят.")
+                return
+
+            answer = sys.stdin.readline().rstrip('\n')
+            if answer in ["1", "2", "3", "4"]:
+                self.final_answer = answer
+            else:
+                print("Ответ не будет засчитан")
+
+        thread = threading.Thread(target=input_thread)
+        thread.daemon = True
+        thread.start()
+        thread.join()
+        
+        if self.final_answer is None:
+            self.send_timeout_answer()
+        else:
+            self.send_answer(self.final_answer)
 
     def send_timeout_answer(self):
-        if self.current_round != -1:  # Если раунд еще активен
-            # ⭐️ UPD (изменил текст, чтоб человек при окончании раунда вышел из функции iput(), так как если останется — всё пойдёт по попе)
-            print("\nВремя вышло! Нажмите ENTER")
-            message = {
-                "type": "answer",
-                "round": self.current_round,
-                "answer": None
-            }
-            self.sock.send(json.dumps(message).encode())
-            self.current_round = -1
-            self.wait_answer = False
+        message = {
+            "type": "answer",
+            "round": self.current_round,
+            "answer": None
+        }
+        self.sock.send(json.dumps(message).encode())
+        self.current_round = -1
 
     def send_answer(self, answer):
-        if self.answer_timer and self.answer_timer.is_alive():
-            self.answer_timer.cancel()
-        
         answer_num = int(answer) - 1 
-        # ⭐️ DEL (сделал проверку выше)
+        self.last_answer = chr(65 + answer_num)
         
         message = {
             "type": "answer",
@@ -149,12 +179,16 @@ class ClientEntity:
         self.current_round = -1
     
     def handle_correct_answer(self, data):
-        print(f"\nПравильный ответ: {data['correct_answ']}")
-        print("Ваш результат: ", "Верно" if data["your_res"] else "Неверно")
+        correct_answ = data["correct_answ"]
+        curr_score = data["curr_score"]
+        
+        # Определяем, правильно ли ответил клиент
+        your_res = self.last_answer == correct_answ  # Сравниваем последний ответ клиента с правильным ответом
+        
+        print(f"Правильный ответ: {correct_answ}")
+        print(f"Ваш результат: {'Верно' if your_res else 'Неверно'}")
         print("Текущий счет:")
-        for i, score in enumerate(data["curr_score"]):                                  # ⭐️ сделать красивую табличку + измеить число на цвет
-            #print(f"Игрок {i}: {score} очков")  
-            # ⭐️ UPD (нужно проверить в каком порядке сервер отправляет результаты)
+        for i, score in enumerate(curr_score):
             print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
 
     def handle_end_game(self, data):
@@ -164,12 +198,11 @@ class ClientEntity:
         winners = [i for i, score in enumerate(data["curr_score"]) if score == max_score]   # ⭐️ проверить как эта строчка работает
         
         for i, score in enumerate(data["curr_score"]):                                  # ⭐️ сделать красивую табличку + измеить число на цвет
-            #print(f"Игрок {i}: {score} очков")  
             # ⭐️ UPD (нужно проверить в каком порядке сервер отправляет результаты)
             print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
         
         if len(winners) == 1:
-            print(f"Победил игрок {winners[0]}!")
+            print(f"Победил игрок {winners[0]}!")    # ⭐️ сделать вывод через цвет
         else:
             print("Ничья между игроками:", ", ".join(map(str, winners)))
         
@@ -178,7 +211,7 @@ class ClientEntity:
     def receive_messages(self):
         while self.running:
             try:
-                data = self.sock.recv(8192)      # изменить буфер
+                data = self.sock.recv(8192)      # ⭐️ изменить буфер
                 if not data:
                     break
                 message = json.loads(data.decode())
@@ -195,7 +228,8 @@ class ClientEntity:
                     self.handle_end_game(message)
                 
             except json.JSONDecodeError:
-                print("Ошибка декодирования сообщения от сервера") # возможно надо отослать серверу?
+                print("Ошибка декодирования сообщения от сервера") # ⭐️ возможно надо отослать серверу?
+                print(f"Полученные данные: {data.decode()}")
             except ConnectionResetError:
                 print("Соединение с сервером разорвано")
                 self.running = False
