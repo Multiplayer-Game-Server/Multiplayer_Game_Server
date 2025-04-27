@@ -198,6 +198,8 @@ class Game:
             
             print(f"All players have answered for round {self.current_round} in game {self.id}.")
             
+            player_results = {}
+            
             # Формируем общий ответ для всех игроков
             response = {
                 'type': 'correct answer',
