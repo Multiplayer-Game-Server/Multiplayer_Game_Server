@@ -25,7 +25,7 @@ class Player:
         self.score = 0  # Player's score
 
 class Game:
-    def __init__(self, game_id, player: Player, server, questions):
+    def __init__(self, game_id, player: Player, server):
         self.server: Server = server
         self._running = True
         self._thread = None
@@ -39,12 +39,24 @@ class Game:
         self.answers_received = 0
         self.question_start_time = 0
         self.scores = defaultdict(int) # player_id -> score
-        self.questions = questions
+        self.questions = self.get_questions()
         self.lock = threading.RLock()
-        self.number_of_rounds = 2
+        self.number_of_rounds = 5
         self.delay_between_questions = 3 # Seconds
         self.round_time_limit = 40
-        
+
+  
+
+    def get_questions(self, num_questions=5):
+        try:
+            with open('questions.json', 'r', encoding='utf-8') as f:
+                all_questions = json.load(f)
+                return random.sample(all_questions, k=num_questions)
+        except Exception as e:
+            print(f"Error loading questions from file: {e}")
+            return []
+
+    
     def handlePlayerConnect(self, player: Player):
         """Add a player to the game"""
         with self.lock:
@@ -180,7 +192,7 @@ class Game:
             self.answers_received += 1
             print(f"Player {player.id} answered. Total answers received: {self.answers_received}/{len(self.players)}")
             # Check if the answer is correct
-            correct = answer_index == self.current_question['correct_option']
+            correct = answer_index == self.current_question['answer']
             if correct:
                 self.scores[player] += 1  # Award points for a correct answer
             
@@ -198,13 +210,11 @@ class Game:
             
             print(f"All players have answered for round {self.current_round} in game {self.id}.")
             
-            player_results = {}
-            
             # Формируем общий ответ для всех игроков
             response = {
                 'type': 'correct answer',
-                'correct_answ': self.current_question['correct_option'],
-                'curr_score': {p.id: self.scores[p] for p in self.players}  # Список очков всех игроков
+                'correct_answ': self.current_question['answer'] + 1,
+                'curr_score': [self.scores[p] for p in self.players]  # Список очков всех игроков
             }
             
             # Отправляем ответ всем игрокам
@@ -308,9 +318,6 @@ class Server:
         self.next_player_id = 0
         self.buffer_size = 10000
         self.lock = threading.Lock()
-        
-        with open('questions.json', 'r', encoding='utf-8') as f:
-            self.all_questions = json.load(f)
 
     def createGame(self, player: Player) -> tuple[int, int]:
         ''' 
@@ -319,8 +326,7 @@ class Server:
         '''
         game_id = self.next_game_id
         self.next_game_id += 1
-        questions_for_game = random.sample(self.all_questions, 25)
-        game = Game(game_id, player, self, questions_for_game)
+        game = Game(game_id, player, self)
         with self.lock:
             self.games[game_id] = game
         return game_id, player.id
