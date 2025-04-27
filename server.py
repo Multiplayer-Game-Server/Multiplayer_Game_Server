@@ -2,6 +2,7 @@ import socket
 import threading
 import json
 import time
+import random
 from collections import defaultdict
 from typing import List
 from typing import Dict
@@ -10,8 +11,11 @@ HOST = '0.0.0.0'
 PORT = 20250
 
 
+#убрать у клиента + 1 к раунду
 # игра начинается сразу если подключенные игрко нажал что готов а другой не подсоединился
-# проблема если клиент не отвечает
+# отсылать правильный ответ сразу или всем после того как все ответили
+#норм что если ввел не тот индекс то сервер ждет ?
+# проблема если клиент не отвечае
 # ошибки у одного их игроково и на стороне сервера
 class Player:
     def __init__(self, client_socket, client_addr, player_id):
@@ -38,41 +42,22 @@ class Game:
         self.scores = defaultdict(int) # player_id -> score
         self.questions = self.get_questions()
         self.lock = threading.RLock()
-        self.number_of_rounds = 2
+        self.number_of_rounds = 5
         self.delay_between_questions = 3 # Seconds
         self.round_time_limit = 40
 
   
 
-    def get_questions(self):
-        """Return a list of sample questions for testing"""
-        return [
-            {
-                "question": "What is the capital of France?",
-                "options": ["Berlin", "Madrid", "Paris", "Rome"],
-                "answer": 2  # Index of the correct answer (C. Paris)
-            },
-            {
-                "question": "Which planet is known as the Red Planet?",
-                "options": ["Earth", "Mars", "Jupiter", "Venus"],
-                "answer": 1  # Index of the correct answer (B. Mars)
-            },
-            {
-                "question": "What is the largest ocean on Earth?",
-                "options": ["Atlantic Ocean", "Indian Ocean", "Arctic Ocean", "Pacific Ocean"],
-                "answer": 3  # Index of the correct answer (D. Pacific Ocean)
-            },
-            {
-                "question": "Who wrote 'Romeo and Juliet'?",
-                "options": ["Charles Dickens", "William Shakespeare", "Mark Twain", "D. Jane Austen"],
-                "answer": 1  # Index of the correct answer (B. William Shakespeare)
-            },
-            {
-                "question": "What is the chemical symbol for water?",
-                "options": ["H2O", "CO2", "O2", "NaCl"],
-                "answer": 0  # Index of the correct answer (A. H2O)
-            }
-        ]
+
+    def get_questions(self, num_questions=5):
+        try:
+            with open('questions.json', 'r', encoding='utf-8') as f:
+                all_questions = json.load(f)
+                return random.sample(all_questions, k=num_questions)
+        except Exception as e:
+            print(f"Error loading questions from file: {e}")
+            return []
+
     
     def handlePlayerConnect(self, player: Player):
         """Add a player to the game"""
@@ -230,7 +215,7 @@ class Game:
             # Формируем общий ответ для всех игроков
             response = {
                 'type': 'correct answer',
-                'correct_answ': chr(65 + self.current_question['answer']),  # Преобразуем индекс в букву (A, B, C, D)
+                'correct_answ': self.current_question['answer'] + 1,
                 'curr_score': [self.scores[p] for p in self.players]  # Список очков всех игроков
             }
             
@@ -471,3 +456,4 @@ class Server:
 if (__name__ == '__main__'):
     server = Server()
     server.serve(HOST, PORT, 10)
+
