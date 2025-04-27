@@ -1,0 +1,1002 @@
+[
+    {
+        "question": "What is a variable in programming?",
+        "options": [
+            "A way of storing data",
+            "Command",
+            "Error",
+            "Operator"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is the process of finding and fixing errors in a program?",
+        "options": [
+            "Compilation",
+            "Decomposition",
+            "Debugging",
+            "Optimization"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What does the if statement do in the code?",
+        "options": [
+            "Repeats a block of code",
+            "Performs a condition check",
+            "Outputs text",
+            "Stops the program"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What data type is used to store integers?",
+        "options": [
+            "float",
+            "char",
+            "int",
+            "string"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is a function in programming?",
+        "options": [
+            "Variable",
+            "A sequence of commands with a name",
+            "Workable code",
+            "Cycle"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What character is commonly used to indicate comments in Python?",
+        "options": [
+            "#",
+            "//",
+            "/* */",
+            "<!-- -->"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is a for loop?",
+        "options": [
+            "Cycle with precondition",
+            "Cycle with postcondition",
+            "Cycle with parameters",
+            "Infinite сycle"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is the name of the \"first in, first out\" data structure?",
+        "options": [
+            "Stack",
+            "Queue",
+            "Array",
+            "Dictionary"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a class in OOP?",
+        "options": [
+            "Object",
+            "Function",
+            "Object Template",
+            "Variable"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is inheritance in OOP?",
+        "options": [
+            "The process of creating a copy of an object",
+            "Passing properties and methods from one class to another",
+            "Creating functions",
+            "Restarting a program"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does SQL stand for?",
+        "options": [
+            "Sequential Question Language",
+            "Structured Query Language",
+            "Simple Query Language",
+            "Standard Query List"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What operator is used to combine conditions in SQL?",
+        "options": [
+            "AND",
+            "JOIN",
+            "MERGE",
+            "UNION"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is \"localhost\"?",
+        "options": [
+            "External server",
+            "Local server on the computer",
+            "Database",
+            "Network protocol"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is an IP address?",
+        "options": [
+            "Username",
+            "Computer ID on a network",
+            "Data file",
+            "Operating system"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What protocol is responsible for transferring web pages?",
+        "options": [
+            "FTP",
+            "HTTP",
+            "SMTP",
+            "SSH"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is DNS?",
+        "options": [
+            "Encoding software",
+            "Domain name to IP address conversion service",
+            "User database",
+            "Authorization mechanism"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the push() method do on the stack?",
+        "options": [
+            "Deletes an item",
+            "Adds an item",
+            "Updates an item",
+            "Searches for an item"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the pop() method do on the stack?",
+        "options": [
+            "Adds an element",
+            "Returns the first element",
+            "Deletes the last element added",
+            "Updates all elements"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is an algorithm?",
+        "options": [
+            "A sequence of actions to achieve a result",
+            "Database",
+            "Operating system",
+            "Network program"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "Which programming language is considered the oldest popular programming language?",
+        "options": [
+            "Python",
+            "C",
+            "Java",
+            "Fortran"
+        ],
+        "correct_option": 3
+    },
+    {
+        "question": "What is a compiler?",
+        "options": [
+            "A program to run applications",
+            "A program to translate code into an executable file",
+            "Antivirus",
+            "Server program"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is the name of the last-in-first-out data structure?",
+        "options": [
+            "Queue",
+            "Stack",
+            "Array",
+            "Tree"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the return statement do in a function?",
+        "options": [
+            "Stops program execution",
+            "Passes a value from a function",
+            "Creates a variable",
+            "Deletes data"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is recursion?",
+        "options": [
+            "A function calls another function",
+            "A function calls itself",
+            "A function calls a loop",
+            "A function calls a condition"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What symbol is used for logical OR in Python?",
+        "options": [
+            "||",
+            "&&",
+            "or",
+            "&"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is an array?",
+        "options": [
+            "A sequence of commands",
+            "A sequence of data of the same type",
+            "A loop in a program",
+            "A condition block"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What programming language is used to create web pages?",
+        "options": [
+            "Python",
+            "C++",
+            "HTML",
+            "Java"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What does the acronym API stand for?",
+        "options": [
+            "Advanced Programming Interface",
+            "Application Programming Interface",
+            "Applied Program Integration",
+            "Application Program Internet"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is an exception in programming?",
+        "options": [
+            "Error situation",
+            "Cycle",
+            "Function",
+            "Constant"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the break operator do in a loop?",
+        "options": [
+            "Continues a loop",
+            "Stops a loop",
+            "Restarts a loop",
+            "Deletes a loop"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is the process of converting code into a format understandable by a computer?",
+        "options": [
+            "Translation",
+            "Analysis",
+            "Interpretation",
+            "Optimization"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the continue operator do in a loop?",
+        "options": [
+            "Ends the execution of the loop",
+            "Skips the rest of the iteration and moves on to the next",
+            "Deletes an element",
+            "Creates a new iteration"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What operator is used for a logical AND in Python?",
+        "options": [
+            "&&",
+            "and",
+            "||",
+            "&"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is an IDE?",
+        "options": [
+            "Program to write code",
+            "Library",
+            "Process",
+            "Loop"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is a class constructor?",
+        "options": [
+            "A function to create an instance",
+            "Variable",
+            "Constant",
+            "Cycle"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does CRUD mean in databases?",
+        "options": [
+            "Create, Read, Update, Delete",
+            "Copy, Remove, Upload, Download",
+            "Create, Refresh, Update, Destroy",
+            "Check, Read, Update, Delete"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the INSERT command do in SQL?",
+        "options": [
+            "Delete a record",
+            "Update a record",
+            "Add a new record",
+            "Search a record"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is primary key in SQL?",
+        "options": [
+            "Key to join tables",
+            "Unique record identifier",
+            "Search index",
+            "Data type"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does HTML mean?",
+        "options": [
+            "HyperText Markup Language",
+            "Home Tool Markup Language",
+            "Hyperlinks and Text Markup Language",
+            "Hyperlinking Text Mark Language"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the <a> tag do in HTML?",
+        "options": [
+            "Creates a header",
+            "Creates a link",
+            "Creates a list",
+            "Creates a Table"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "Which programming language compiles directly to machine code?",
+        "options": [
+            "Python",
+            "Java",
+            "C",
+            "PHP"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is the == operator?",
+        "options": [
+            "Assignment",
+            "Equality comparison",
+            "Termination condition",
+            "String concatenation"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does JSON abbreviation mean?",
+        "options": [
+            "JavaScript Open Notation",
+            "Java Standard Object Notation",
+            "JavaScript Object Notation",
+            "Just Simple Object Notation"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is a library in programming?",
+        "options": [
+            "Program",
+            "Code Collection",
+            "Error in Code",
+            "Operating System"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is an object in OOP?",
+        "options": [
+            "Function",
+            "Class Instance",
+            "Variable",
+            "Array"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What statement terminates a program in Python when an error occurs?",
+        "options": [
+            "exit()",
+            "continue",
+            "return",
+            "pass"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the UPDATE command do in SQL?",
+        "options": [
+            "Adds a record",
+            "Deletes a record",
+            "Modifies a record",
+            "Reads a record"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is an environment variable?",
+        "options": [
+            "Operating system parameters",
+            "Variable in code",
+            "Function",
+            "Data type"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the “!=” operator do?",
+        "options": [
+            "Compares for equality",
+            "Checks for inequality",
+            "Adds values",
+            "Clears a value"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a method in a class?",
+        "options": [
+            "Constant",
+            "Function within a class",
+            "Loop",
+            "Database"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the bug mean?",
+        "options": [
+            "Code optimization",
+            "Error in a program",
+            "Program improvement",
+            "Running a program"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a module in Python?",
+        "options": [
+            "Separate code file",
+            "Loop",
+            "Function",
+            "Variable"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the += operator do?",
+        "options": [
+            "Multiplies a value",
+            "Increases a value",
+            "Divides a value",
+            "Nullifies a value"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a string in programming?",
+        "options": [
+            "Numeric value",
+            "Boolean value",
+            "Character sequence",
+            "Loop type"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What does commit mean in Git?",
+        "options": [
+            "Deleting a project",
+            "Creating a copy of the project",
+            "Fixing changes",
+            "Updating the system"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "Which language is considered the basic language for creating styles on web pages?",
+        "options": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "PHP"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the term Frontend mean?",
+        "options": [
+            "Server side",
+            "Client side",
+            "Database",
+            "API interface"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the append() method do in a Python list?",
+        "options": [
+            "Deletes an item",
+            "Adds an item to the end of the list",
+            "Moves an item",
+            "Modifies an item"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the SELECT DISTINCT command do in SQL?",
+        "options": [
+            "Selects unique values",
+            "Selects duplicates",
+            "Deletes records",
+            "Adds new records"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is async in programming?",
+        "options": [
+            "Parallel code execution",
+            "Queuing code execution",
+            "Running code after completion",
+            "Execution error"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is recursion?",
+        "options": [
+            "The process of calling a function on itself",
+            "Loop type",
+            "Data structure",
+            "Sorting an array"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the “==” operator do in Python?",
+        "options": [
+            "Assigns a value",
+            "Compares two values",
+            "Adds two numbers",
+            "Creates a variable"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is array in programming?",
+        "options": [
+            "Function",
+            "Variable",
+            "Array of elements",
+            "Condition"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is the name of a key-value database?",
+        "options": [
+            "Relational database",
+            "SQL database",
+            "NoSQL database",
+            "Graph database"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What language is used for marking up web pages?",
+        "options": [
+            "Python",
+            "HTML",
+            "C++",
+            "Java"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a for loop?",
+        "options": [
+            "A loop with a known number of iterations",
+            "A loop with an unknown number of iterations",
+            "Conditional statement",
+            "Error"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is the name of the programming language for iOS?",
+        "options": [
+            "Python",
+            "Swift",
+            "Kotlin",
+            "Go"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What data type stores a logical value?",
+        "options": [
+            "int",
+            "bool",
+            "char",
+            "float"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the len() function return in Python?",
+        "options": [
+            "Array",
+            "List",
+            "Object length",
+            "Object copy"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is a conditional statement?",
+        "options": [
+            "Cycle",
+            "Function",
+            "Condition check",
+            "Variable"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What does the print() command do?",
+        "options": [
+            "Runs a loop",
+            "Outputs data to the screen",
+            "Creates a file",
+            "Deletes data"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "Which language is compiled?",
+        "options": [
+            "Python",
+            "Java",
+            "C++",
+            "HTML"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What operator is used for logical And in Python?",
+        "options": [
+            "||",
+            "&&",
+            "and",
+            "or"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is the name of the base database element?",
+        "options": [
+            "Table",
+            "Function",
+            "Loop",
+            "Variable"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the operator “+” do with two strings in Python?",
+        "options": [
+            "Multiplies Them",
+            "Compares Them",
+            "Concatenates Them",
+            "Removes Them"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "How do I use it to enter user data in Python?",
+        "options": [
+            "scan()",
+            "read()",
+            "input()",
+            "get()"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is GitHub?",
+        "options": [
+            "Programming language",
+            "Platform for version control and collaboration",
+            "Code Editor",
+            "Database"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does the application programming interface mean?",
+        "options": [
+            "Advanced programming interface",
+            "Application Programming Interface",
+            "Automated interaction with programs",
+            "Application Program Internet"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "How is this method used to create a link in HTML?",
+        "options": [
+            "<link>",
+            "<a>",
+            "<h1>",
+            "<p>"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is an IDE?",
+        "options": [
+            "Integrated Development Environment",
+            "Database",
+            "Programming Language",
+            "Array"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "Which method adds an item to the end of a list in Python?",
+        "options": [
+            "append()",
+            "insert()",
+            "add()",
+            "push()"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What does the ** operator do in Python?",
+        "options": [
+            "Division",
+            "Exponentiation",
+            "Multiplication",
+            "Modular division"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a framework?",
+        "options": [
+            "Compiler",
+            "Code library",
+            "Software solution template",
+            "Function"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is the name of the main data transfer protocol on the Internet?",
+        "options": [
+            "FTP",
+            "SMTP",
+            "HTTP",
+            "TCP"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "Which method removes an item from a list in Python?",
+        "options": [
+            "delete()",
+            "remove()",
+            "erase()",
+            "cut()"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a variable?",
+        "options": [
+            "Condition",
+            "Function name",
+            "Object to store data",
+            "Library"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What operator is used for the remainder of division in Python?",
+        "options": [
+            "/",
+            "%",
+            "*",
+            "//"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What is a compiler?",
+        "options": [
+            "Text editor",
+            "A program that converts code into an executable file",
+            "Database",
+            "Version control system"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does frontend mean in development?",
+        "options": [
+            "Developing server-side logic",
+            "Developing the client side of an application",
+            "Working with databases",
+            "Designing an architecture"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What language is usually used to write the server side?",
+        "options": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Python"
+        ],
+        "correct_option": 3
+    },
+    {
+        "question": "What does debugging mean?",
+        "options": [
+            "Adding new functions",
+            "Removing bugs from the program",
+            "Optimizing the code",
+            "Creating a new project"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "Which operator checks whether an item belongs to the list in Python?",
+        "options": [
+            "in",
+            "==",
+            "is",
+            "not"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is a \"repository\" in Git?",
+        "options": [
+            "Error",
+            "Code Library",
+            "Project storage with version history",
+            "Function"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What is JSON?",
+        "options": [
+            "Programming language",
+            "Data storage and transmission format",
+            "Version control system",
+            "Program"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What does OOP mean?",
+        "options": [
+            "Online Operating Program",
+            "Object-Oriented Programming",
+            "Open Object Project",
+            "Open Operating Platform"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What type of data is an integer?",
+        "options": [
+            "str",
+            "float",
+            "int",
+            "bool"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "Which method in Python sorts the list?",
+        "options": [
+            "sort()",
+            "order()",
+            "arrange()",
+            "align()"
+        ],
+        "correct_option": 0
+    },
+    {
+        "question": "What is a stack in programming?",
+        "options": [
+            "Array type",
+            "LIFO data structure",
+            "Function",
+            "Server"
+        ],
+        "correct_option": 1
+    },
+    {
+        "question": "What language is used for animation on websites?",
+        "options": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "SQL"
+        ],
+        "correct_option": 2
+    },
+    {
+        "question": "What does the DRY principle mean in programming?",
+        "options": [
+            "Do not Repeat Yourself",
+            "Do Right Yourself",
+            "Dynamic Response Yield",
+            "Data Return Yard"
+        ],
+        "correct_option": 0
+    }
+]
