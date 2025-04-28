@@ -417,7 +417,7 @@ class Server:
                 elif message['type'] == 'connect':
                     # Подключение к существующей комнате
                     game_id = int(message['game_id'])
-                    if game_id not in self.games:
+                    if (game_id not in self.games) or (self.games[game_id].game_state != "waiting"):
                         # Если комната не существует, отправляем сообщение об ошибке
                         error_message = {
                             "type": "status",
