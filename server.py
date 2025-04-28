@@ -30,6 +30,7 @@ class Game:
         self.server: Server = server
         self._running = True
         self._thread = None
+        self.deleted_players = {}
         self.id = game_id
         self.players: List[Player] = [player]
         self.game_state = 'waiting'  # waiting, playing, finished
@@ -172,10 +173,7 @@ class Game:
     def process_answer(self, player: Player, round_number, answer_index):
         """Process a player's answer"""
         with self.lock:
-            
-            # if self.game_state != 'playing' or self.current_question is None:
-            #     return
-            
+
             # # Ensure the answer is for the current round
             # if round_number != self.current_round:
             #     return
@@ -200,6 +198,7 @@ class Game:
             
             
             # Check if all players have answered
+            active_players = [p for p in self.players if p.socket]
             if self.answers_received >= len(self.players):
                 self.handle_all_answered()
         
@@ -216,7 +215,8 @@ class Game:
             response = {
                 'type': 'correct answer',
                 'correct_answ': self.current_question['answer'] + 1,
-                'curr_score': [self.scores[p] for p in self.players]  # Список очков всех игроков
+                'curr_score': [self.scores[p] for p in self.players],  # Список очков всех игроков
+                'deleted_players': [{'id': player_id, 'score': score} for player_id, score in self.deleted_players.items()] 
             }
             
             # Отправляем ответ всем игрокам
@@ -275,6 +275,8 @@ class Game:
                     player.socket = None  # Устанавливаем сокет в None, чтобы избежать повторного закрытия
                 except Exception as e:
                     print(f"Error closing socket for player {player.id}: {e}")
+            else:
+                print(f"Socket for player {player.id} is already closed.")
 
     def broadcast(self, message):
         """Send a message to all players"""
@@ -286,7 +288,7 @@ class Game:
                 if player.socket:  # Проверяем, что сокет еще существует
                     player.socket.send(message.encode())
                     print(f"Send message to {player.address[0]}: {player.address[1]}")
-            except (ConnectionResetError, BrokenPipeError):
+            except (ConnectionResetError, BrokenPipeError, OSError):
                 print(f"Player {player.address[0]}:{player.address[1]} disconnected during broadcast.")
                 self.handle_disconnect(player)
             except Exception as e:
@@ -301,6 +303,7 @@ class Game:
             
             if player in self.players:
                 print(f"Close connection: {player.address[0]}:{player.address[1]}")
+                self.deleted_players[player.id] = self.scores[player]
                 self.players.remove(player)
                 try:
                     player.socket.close()
@@ -311,6 +314,11 @@ class Game:
                 # Если все игроки отключились, завершаем игру
                 if self.game_state == 'playing' and len(self.players) == 0:
                     self.end_game()
+                else:
+                    # Если игрок отключился во время раунда, проверяем, нужно ли завершить раунд
+                    active_players = [p for p in self.players if p.socket]
+                    if self.answers_received >= len(active_players):
+                        self.handle_all_answered()
     
     
 class Server:
@@ -410,9 +418,12 @@ class Server:
     def listen_to_player(self, player: Player, game_id):
         """Listen to messages from a connected player"""
         game = self.games[game_id]
+        if not game:
+            print(f"Game {game_id} not found for player {player.id}")
+            return
         while True:
             try:
-                if not player.socket:  # Проверяем, что сокет еще существует
+                if not player.socket or not game._running:  # Проверяем, что сокет еще существует
                     break
                 # Получение сообщения от игрока
                 message = self.getMessage(player.socket)
@@ -427,12 +438,12 @@ class Server:
                 else:
                     print(f"Unknown message type: {message['type']}")
                     
-            except (ConnectionResetError, BrokenPipeError):
+            except (ConnectionResetError, BrokenPipeError, OSError):
                 print(f"Player {player.address[0]}:{player.address[1]} disconnected.")
                 game.handle_disconnect(player)
                 break
             except Exception as e:
-                print(f"Error handling player {player.address[0]}:{player.address[1]}: {e}")
+                print(f"Seems that player disconnected {player.address[0]}:{player.address[1]}: {e}")
                 game.handle_disconnect(player)
                 break
             
