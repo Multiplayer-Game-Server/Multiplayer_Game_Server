@@ -484,5 +484,5 @@ class Server:
         self.manage_new_connection()
 
 if (__name__ == '__main__'):
-    server = Server() # Полин, а нам ведь надо еще вот это добавить в наш json? строка 420
-    server.serve(HOST, PORT, 25) # может удалить? вроде не используем это. Хорошо.как скажешь
+    server = Server() 
+    server.serve(HOST, PORT, 25) 
