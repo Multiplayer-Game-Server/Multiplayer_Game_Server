@@ -198,8 +198,8 @@ class Game:
             
             response = {
                 'type': 'correct answer',
-                'correct_answ': self.current_question['answer'] + 1,
-                'curr_score': [self.scores[p] for p in self.players],  # Список очков всех игроков
+                'correct_answ': self.current_question['answer'] + 1, 
+                'curr_score': [self.scores[p] for p in self.players],  
                 'deleted_players': [{'id': player_id, 'score': score} for player_id, score in self.deleted_players.items()] 
             }
             
