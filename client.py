@@ -3,7 +3,11 @@ import socket
 import sys
 import threading
 import time
-import select
+
+if sys.platform == "win32":
+    import msvcrt
+else:
+    import select
 
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 20250
@@ -135,17 +139,36 @@ class ClientEntity:
         def input_thread():
             print("Ваш ответ (1-4):")
 
-            rlist, _, _ = select.select([sys.stdin], [], [], 30.0)
-    
-            if not rlist:  # ⭐️ Если время вышло
-                print("\nВремя вышло! Ответ не принят.")
-                return
+            # Windows: используем msvcrt
+            if sys.platform == "win32":
+                start_time = time.time()
+                while True:
+                    if msvcrt.kbhit():  # Проверяем, есть ли ввод
+                        answer = msvcrt.getch().decode()
+                        if answer in ["1", "2", "3", "4"]:
+                            self.final_answer = answer
+                            break
+                        else:
+                            print("Ответ не будет засчитан")
+                            break
+                    
+                    # Проверяем таймаут 30 сек
+                    if time.time() - start_time > 30:
+                        print("\nВремя вышло! Ответ не принят.")
+                        break
 
-            answer = sys.stdin.readline().rstrip('\n')
-            if answer in ["1", "2", "3", "4"]:
-                self.final_answer = answer
+            # Unix (Mac/Linux): используем select
             else:
-                print("Ответ не будет засчитан")
+                rlist, _, _ = select.select([sys.stdin], [], [], 30.0)
+                if not rlist:
+                    print("\nВремя вышло! Ответ не принят.")
+                    return
+
+                answer = sys.stdin.readline().rstrip('\n')
+                if answer in ["1", "2", "3", "4"]:
+                    self.final_answer = answer
+                else:
+                    print("Ответ не будет засчитан")
 
         thread = threading.Thread(target=input_thread)
         thread.daemon = True
@@ -181,15 +204,27 @@ class ClientEntity:
     def handle_correct_answer(self, data):
         correct_answ = data["correct_answ"]
         curr_score = data["curr_score"]
+        deleted_players = data["deleted_players"]
         
         # Определяем, правильно ли ответил клиент
         your_res = self.last_answer == correct_answ  # Сравниваем последний ответ клиента с правильным ответом
         
         print(f"Правильный ответ: {correct_answ}")
         print(f"Ваш результат: {'Верно' if your_res else 'Неверно'}")
+        #удалить удалённых игроков из списка игроков
+        if deleted_players != None:
+            for pair in deleted_players:
+                # 'deleted_players': [{'id': player_id, 'score': score} for player_id, score in self.deleted_players.items()] 
+                player_id = pair['id']
+                if player_id in self.players:
+                    self.players.remove(player_id)
         print("Текущий счет:")
         for i, score in enumerate(curr_score):
             print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
+        if deleted_players != None:
+            print("Игроки, которые отключились:")
+            for pair in deleted_players:
+                print(f"Игрок {self.get_name(pair['id'])}: {pair['score']} очков")
 
     def handle_end_game(self, data):
         print("\nИгра окончена!")
@@ -202,8 +237,10 @@ class ClientEntity:
             print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
         
         if len(winners) == 1:
-            print(f"Победил игрок {winners[0]}!")    # ⭐️ сделать вывод через цвет
+            print(f"Победил игрок {self.get_name(self.players[winners[0]])}!")    # ⭐️ сделать вывод через цвет
         else:
+            for i in winners:
+                winners[i] = self.get_name(self.players[i])
             print("Ничья между игроками:", ", ".join(map(str, winners)))
         
         self.running = False
