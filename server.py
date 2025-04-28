@@ -80,17 +80,17 @@ class Game:
                         self.handle_disconnect(p)
 
             # Отправить сообщение "status" только новому игроку
-            status_message = {
-                "type": "status",
-                "player_id": player.id,
-                "game_id": self.id,
-                "list_of_players": [p.id for p in self.players]
-            }
-            try:
-                player.socket.send(json.dumps(status_message).encode())
-            except Exception as e:
-                print(f"Error sending 'status' message to {player.address}: {e}")
-                self.handle_disconnect(player)
+            # status_message = {
+            #     "type": "status",
+            #     "player_id": player.id,
+            #     "game_id": self.id,
+            #     "list_of_players": [p.id for p in self.players]
+            # }@
+            # try:
+            #     player.socket.send(json.dumps(status_message).encode())
+            # except Exception as e:
+            #     print(f"Error sending 'status' message to {player.address}: {e}")
+            #     self.handle_disconnect(player)
 
             # Возвращаем ID нового игрока и список всех игроков
             return player.id, [p.id for p in self.players]
@@ -122,6 +122,13 @@ class Game:
     def next_round(self):
         """Move to the next round"""
         with self.lock:
+            if not self._running:
+                return
+            if len(self.players) == 0:
+                print(f"No players left in game {self.id}. Ending game.")
+                self.end_game()
+                return
+            
             if self.current_round >= self.number_of_rounds:
                 self.end_game()
                 return
@@ -155,6 +162,9 @@ class Game:
     def check_time_up(self):
         """Check if time is up for the current round"""
         with self.lock:
+            if not self._running:
+                return
+            
             elapsed_time = time.time() - self.question_start_time
             if elapsed_time >= self.round_time_limit and self.answers_received < len(self.players):
                 print(f"Time is up for round {self.current_round} in game {self.id}.")
@@ -240,10 +250,14 @@ class Game:
     def end_game(self):
         """End the game and announce results"""
         with self.lock:
+            if not self._running:
+                return
             self._running = False 
             print(f"Game {self.id} is ending.")
             self.game_state = 'finished'
 
+            if hasattr(self, 'round_timer') and self.round_timer.is_alive():
+                self.round_timer.cancel()
             # Determine the winner
             winner = None
             if self.scores:
@@ -382,37 +396,70 @@ class Server:
         player = Player(client_socket, client_addr, player_id)
         print(f"New connection from {client_addr[0]}: {client_addr[1]}")
 
-        # Waiting for a request from the newly connected player
-        message = self.getMessage(client_socket)
-        print(f"Got message from {client_addr[0]}: {client_addr[1]}:")
+        while True:  # Цикл для обработки нескольких запросов от клиента
+            try:
+                # Ожидание сообщения от клиента
+                message = self.getMessage(client_socket)
+                print(f"Got message from {client_addr[0]}: {client_addr[1]}: {message}")
 
-        # Create a room and generate a reply to the player if there was a request to create a room 
-        if (message['type'] == 'create'): 
-            game_id, player_id = self.createGame(player)
-            answer = {
-                "type": "status",
-                "player_id": player_id,
-                "game_id": game_id,
-                "list_of_players": [player_id]
-            }
-            client_socket.send(json.dumps(answer).encode())
-        # Connects the player to the room and generate a reply to the player.
-        elif (message['type'] == 'connect'):
-            game_id = int(message['game_id']) 
-            game_id, player_id, list_players = self.connectGame(game_id, player)
-        
-        else:
-            answer = {"type": "Error"}
-    
-            client_socket.send(json.dumps(answer).encode())
-        
+                if message['type'] == 'create':
+                    # Создание новой комнаты
+                    game_id, player_id = self.createGame(player)
+                    answer = {
+                        "type": "status",
+                        "player_id": player_id,
+                        "game_id": game_id,
+                        "list_of_players": [player_id]
+                    }
+                    client_socket.send(json.dumps(answer).encode())
+                    break  # Выходим из цикла, так как клиент успешно создал комнату
+
+                elif message['type'] == 'connect':
+                    # Подключение к существующей комнате
+                    game_id = int(message['game_id'])
+                    if game_id not in self.games:
+                        # Если комната не существует, отправляем сообщение об ошибке
+                        error_message = {
+                            "type": "status",
+                            "player_id": player_id,
+                            "game_id": None,  # Указываем, что комната не найдена
+                            "list_of_players": []
+                        }
+                        client_socket.send(json.dumps(error_message).encode())
+                        print(f"Player {client_addr[0]}:{client_addr[1]} tried to connect to a non-existent game {game_id}.")
+                        continue  # Продолжаем ожидать новых сообщений от клиента
+
+                    # Если комната существует, подключаем игрока
+                    game_id, player_id, list_players = self.connectGame(game_id, player)
+                    answer = {
+                        "type": "status",
+                        "player_id": player_id,
+                        "game_id": game_id,
+                        "list_of_players": list_players
+                    }
+                    client_socket.send(json.dumps(answer).encode())
+                    break  # Выходим из цикла, так как клиент успешно подключился к комнате
+
+                else:
+                    # Обработка неизвестного типа сообщения
+                    answer = {"type": "Error"}
+                    client_socket.send(json.dumps(answer).encode())
+
+            except json.JSONDecodeError:
+                print(f"Invalid JSON message from {client_addr[0]}:{client_addr[1]}. Closing connection.")
+                break
+            except Exception as e:
+                print(f"Error handling client {client_addr[0]}:{client_addr[1]}: {e}")
+                break
+
+        # Запускаем поток для обработки сообщений от клиента, если он успешно подключился к комнате
         player_thread = threading.Thread(
             target=self.listen_to_player,
             args=(player, game_id),
             daemon=True
         )
         player_thread.start()
-        
+            
         
         
     def listen_to_player(self, player: Player, game_id):
@@ -467,4 +514,3 @@ class Server:
 if (__name__ == '__main__'):
     server = Server()
     server.serve(HOST, PORT, 10)
-
