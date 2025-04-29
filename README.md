@@ -2,16 +2,16 @@
 
 Multiuser quiz with a Python server using sockets. Players answer questions related to it industry and compete for the best result.
 ## 🔍 Description
-- [📄 About the project](#About-the-project): in this section you will find a brief description of the project.
+- [📄 About the project](#📄-About-the-project): in this section you will find a brief description of the project.
 - [🚀 Project features](#Project-features): in this section you will find the specifics of the project implementation 
 - [🎯 Game Mechanics](#Game-Mechanics): in this section you will find the features of the game's implementation.
 - [⚙️ Requirements](#Requirements): in this section you will find the necessary resources that must be installed in order for the program to work .
-- [💿 How to use the program](#How-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
+- [💿 How to use the program](#💿-How-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
 
 ## 📄 About the project
 The project was created as part of an academic project activity in which students demonstrate their proficiency with sockets in Python, threads in Python, and synchronizing multiple clients and a server.
 
-## 🔖 Project features
+## 🚀 Project features
 - Client-server communication is implemented in the project.
 - The program works on TCP protocol of transport level.
 - Terminal Game.
@@ -25,7 +25,7 @@ The project was created as part of an academic project activity in which student
     - **Port to connect to:** 20250
     - *(Parameters can be modified inside the client.py file)*
 
-## 🔖 Game Mechanics
+## 🎯 Game Mechanics
 - Each game consists of 5 rounds.
 - Each round contains 4 types of answers.
 - Each question is given 30 seconds to answer.
@@ -40,7 +40,7 @@ The project was created as part of an academic project activity in which student
 ### Server side:
 - Download the project from github
 ```bash
-git clone https://github.com/...
+git clone https://github.com/Multiplayer-Game-Server/Multiplayer_Game_Server.git
 cd ./Multiplayer_Game_Server
 ```
 - Start a server on one of the host
@@ -53,7 +53,7 @@ Only the *client.py* file is required.
 All players should have *client.py* file.
 - Download the project from github
 ```bash
-git clone https://github.com/...
+git clone https://github.com/Multiplayer-Game-Server/Multiplayer_Game_Server.git
 cd ./Multiplayer_Game_Server
 ```
 - Start a client on one of the host
