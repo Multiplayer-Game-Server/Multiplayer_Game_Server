@@ -2,11 +2,11 @@
 
 Multiuser quiz with a Python server using sockets. Players answer questions related to it industry and compete for the best result.
 ## 🔍 Description
-- [📄 About the project](#about-the-project): in this section you will find a brief description of the project.
-- [🚀 Project features](#project-features): in this section you will find the specifics of the project implementation 
-- [🎯 Game Mechanics](#game-mechanics): in this section you will find the features of the game's implementation.
-- [⚙️ Requirements](#requirements): in this section you will find the necessary resources that must be installed in order for the program to work .
-- [💿 How to use the program](#how-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
+- [📄 About the project](#-about-the-project): in this section you will find a brief description of the project.
+- [🚀 Project features](#-project-features): in this section you will find the specifics of the project implementation 
+- [🎯 Game Mechanics](#-game-mechanics): in this section you will find the features of the game's implementation.
+- [⚙️ Requirements](#%EF%B8%8F-requirements): in this section you will find the necessary resources that must be installed in order for the program to work.
+- [💿 How to use the program](#-how-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
 
 ## 📄 About the project
 The project was created as part of an academic project activity in which students demonstrate their proficiency with sockets in Python, threads in Python, and synchronizing multiple clients and a server.
@@ -21,10 +21,10 @@ The project was created as part of an academic project activity in which student
     - **Total number of clients the server can handle:** 25
     - *(Parameters can be modified inside the server.py file)*
 - Default client settings:
-    - **ip address to connect to:** localhost
+    - **ip address to connect to:** 127.0.0.1
     - **Port to connect to:** 20250
     - *(Parameters can be modified inside the client.py file)*
-
+      
 ## 🎯 Game Mechanics
 - Each game consists of 5 rounds.
 - Each round contains 4 options of answers.
