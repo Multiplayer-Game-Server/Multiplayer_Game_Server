@@ -372,7 +372,7 @@ class Server:
             player_id = self.next_player_id
             self.next_player_id += 1
         player = Player(client_socket, client_addr, player_id)
-        print(f"New connection from {client_addr[0]}: {client_addr[1]}")
+        print(f"New connection from {client_addr[0]}: {client_addr[1]}. ")
 
         # Loop to handle multiple requests from a client
         while True:
