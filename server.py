@@ -307,6 +307,11 @@ class Game:
                 
                 # Check if there are still players in the room, 
                 # If not, finish the game
+                if self.game_state == 'waiting' and len(self.players) == 0:
+                    print(f"Game {self.id} has no players left. Ending game.")
+                    self.server.remove_game(self.id)
+                    return
+                
                 if self.game_state == 'playing' and len(self.players) == 0:
                     self.end_game()
                 else:
