@@ -9,6 +9,12 @@ if sys.platform == "win32":
 else:
     import select
 
+import os
+if sys.platform == "win32":
+    os.system(f'mode con: cols=52 lines=35')
+else:  # Linux/macOS
+    print("\x1b[8;35;52t")
+
 SERVER_HOST = '127.0.0.1'
 SERVER_PORT = 20250
 
@@ -21,10 +27,12 @@ class ClientEntity:
         self.running = True
         self.answer_timer = None
         self.current_round = -1
-        self.colours = ["RED", "GREEN", "BLUE", "YELLOW", "BLACK", "WHITE", "PINK", "ORANGE", "PURPLE", "BROWN", "GREY", "CYAN", "MAROON", "LIME", "OLIVE", "AQUA", "FUCHSIA", "INDIGO", "VIOLET", "MAGENTO"]
+        self.colours = ["RED", "BLUE", "GREEN", "YELLOW", "PINK", "WHITE", "BLACK", "ORANGE", "CYAN", "LIME", "GREY", "CORAL", "BROWN", "AMBER", "OLIVE", "AQUA", "LAVA", "INDIGO", "RUST", "IVORY"]
         self.wait_ready = True
         self.final_answer = None
         self.last_answer = None
+        self.prev_results = {}
+        self.all_marks = [None, None, None, None, None]
 
     def start(self):
         # ⭐️ UPD (TCP соединение)
@@ -34,46 +42,54 @@ class ClientEntity:
             print(f"Ошибка подключения к серверу: {e}")
             self.running = False
             return
-        
-        print("Добро пожаловать в викторину!")
-        print("1. Создать новую комнату")
-        print("2. Присоединиться к существующей комнате")
 
-        # ⭐️ UPD (взял в цикл)
+        print("┌─ - - - - - - - - - - - - - - - - - - - - - - - ─ ┐")
+        for i in range (33):
+            print("|                                                  |")   
+        print("└─ - - - - - - - - - - - - - - - - - - - - - - - ─ ┘")
+        print()
+        print("====================================================")
+        print("✨          WHO WANTS TO BE A PROGRAMMER          ✨")
+        print("====================================================")
+        print()
+        print("                Welсome, New Player!                ")
+        print()
+        print("For a comfortable game, connect the borders of the  terminal with the borders of the rectangle above.")
+        print()
+        print("Choose an option:")
+        print("1. Create a new game room")
+        print("2. Join an existing room\n")
+
         while True:
-            choice = input("Выберите действие: ").strip()
+            choice = input("Your choose: ").strip()
             if choice == "1":
                 self.create_game()
                 break
             elif choice == "2":
-                # ⭐️ DEL
                 self.join_game()
                 break
             else:
-                print("Неверный выбор")
+                print("❌ Invalid choice. Please enter '1' or '2'")
 
         receiver_thread = threading.Thread(target=self.receive_messages)
         receiver_thread.daemon = True
         receiver_thread.start()
     
-    # ⭐️ NEW (функция, чтоб определить цвет игрока)
     def get_name(self, ip):
         return f"{self.colours[ip % len(self.colours)]}_{ip}"
 
     def create_game(self):
         message = {"type": "create"}
         self.sock.send(json.dumps(message).encode())
-        print("Создаем новую комнату...")
 
     def join_game(self):
         # ⭐️ UPD (пеперместил input)
-        game_id = input("Введите ID комнаты: ").strip()
+        game_id = input("Enter room ID: ").strip()
         message = {
             "type": "connect",
             "game_id": game_id
         }
         self.sock.send(json.dumps(message).encode())
-        print(f"Пытаемся присоединиться к комнате {game_id}...")
 
     def handle_status(self, data):
         self.player_id = data["player_id"]
@@ -81,23 +97,25 @@ class ClientEntity:
         self.players = data["list_of_players"]
         
         if self.game_id is None:
-            print("Ошибка: такой комнаты не существует")
+            print("\nSorry, room does not exist... Try again.")
             # ⭐️ UPD (повторная попытка подключения)
             self.join_game()
         else:
-            # ⭐️ UPD (изменил id на цвет)
-            print(f"Вы подключились к комнате {self.game_id} как игрок {self.get_name(self.player_id)}")
-            # ⭐️ UPD (Вывел в одну строчку через запятую всех игроков, но вместо id показывал цвет)
-            print(f"Текущие игроки в комнате: ", end="")
-            for player_id in self.players:
-                print(f"{self.get_name(player_id)}", end=" ")
+            names = [self.get_name(player_id) for player_id in self.players]
+            
             print()
-            self.wait_for_ready()     # ⭐️ Непонятно будет ли он пока ждёт начала получать сообщения о новых игроках... (скорее всего все сообщения о новых игроках прийдут после нажатия "готов")
+            print("┌─────────────┬───────┬─────────────┬──────────────┐")
+            print(f"│   Room ID   │{self.game_id:^7}│  Your Name  │{self.get_name(self.player_id):^14}│")
+            print("└─────────────┴───────┴─────────────┴──────────────┘")
+            print("👥 Current players: ", ", ".join(map(str, names)))
+            print()
+
+            self.wait_for_ready()
 
     def wait_for_ready(self):
         def receive_players():
             while self.wait_ready:
-                data = self.sock.recv(8192)      # ⭐️ изменить буфер
+                data = self.sock.recv(8192)
                 if not data:
                     break
                 message = json.loads(data.decode())
@@ -106,74 +124,82 @@ class ClientEntity:
                 elif message["type"] == "question":
                     self.handle_question(message)
                 else:
-                    print("Вы попали сюда...")
+                    print("Вы попали...")
 
         self.wait_ready = True
         thread = threading.Thread(target=receive_players)
         thread.start()
 
-        input("Нажмите ENTER когда будете готовы начать игру").strip()
+        input("Press ENTER to get READY\n").strip()
+
 
         self.wait_ready = False
 
         message = {"type": "ready to start"}
         self.sock.send(json.dumps(message).encode())
-        print("Ожидаем готовности других игроков...")
+        print("⏳ Waiting for other players to be ready...\n")
 
-        thread.join()  # Ждём завершения потока
+        thread.join()
 
     def handle_new_player(self, data):
         # ⭐️ NEW (Добавил игрока в список)
         self.players.append(data["player_id"])
-        print(f"\nНовый игрок подключился: {self.get_name(data['player_id'])}")
+        print(f"\n▶︎ New player joined: {self.get_name(data['player_id'])}")
 
     def handle_question(self, data):
         self.current_round = data["round"]
-        print(f"\nРаунд {self.current_round + 1}/5:")
+        print("\n"*23)
+        print(f"\n\n\n\n\n\n\n\n\n================= 🎯 ROUND {self.current_round + 1}/5 🎯 ==================")
         print(data["question"])
-        for i, option in enumerate(data["options"]):            # ⭐️ проверить как эта строчка работает
+        print("====================================================")
+        for i, option in enumerate(data["options"]):
             print(f"{i+1}. {option}")
+        print()
 
         self.final_answer = None
 
         def input_thread():
-            print("Ваш ответ (1-4):")
 
-            # Windows: используем msvcrt
+            # ⭐️ Windows: use "msvcrt"
             if sys.platform == "win32":
+                print("⌛ Press 1-4 within 30 seconds:")
                 start_time = time.time()
                 while True:
-                    if msvcrt.kbhit():  # Проверяем, есть ли ввод
+                    if msvcrt.kbhit():  # ⭐️ Проверяем, есть ли ввод
                         answer = msvcrt.getch().decode()
                         if answer in ["1", "2", "3", "4"]:
                             self.final_answer = answer
+                            print("Your answer: " + answer)
                             break
                         else:
-                            print("Ответ не будет засчитан")
+                            print("❌ Invalid answer, not accepted")
                             break
                     
-                    # Проверяем таймаут 30 сек
+                    # ⭐️ Проверяем таймаут 30 сек
                     if time.time() - start_time > 30:
-                        print("\nВремя вышло! Ответ не принят.")
+                        print("⏰ Time's up! Answer not accepted.")
                         break
 
-            # Unix (Mac/Linux): используем select
+            # ⭐️ Unix (Mac/Linux): use "select"
             else:
+                print("⌛ Enter your answer within 30 seconds (1-4):")
                 rlist, _, _ = select.select([sys.stdin], [], [], 30.0)
                 if not rlist:
-                    print("\nВремя вышло! Ответ не принят.")
+                    print("⏰ Time's up! Answer not accepted.")
                     return
 
                 answer = sys.stdin.readline().rstrip('\n')
                 if answer in ["1", "2", "3", "4"]:
                     self.final_answer = answer
+                    print("Your answer: " + answer)
                 else:
-                    print("Ответ не будет засчитан")
+                    print("❌ Invalid answer, not accepted")
 
         thread = threading.Thread(target=input_thread)
         thread.daemon = True
         thread.start()
         thread.join()
+        print("====================================================")
         
         if self.final_answer is None:
             self.send_timeout_answer()
@@ -187,11 +213,11 @@ class ClientEntity:
             "answer": None
         }
         self.sock.send(json.dumps(message).encode())
-        self.current_round = -1
+        self.last_answer = None
 
     def send_answer(self, answer):
         answer_num = int(answer) - 1 
-        self.last_answer = chr(65 + answer_num)
+        self.last_answer = answer_num + 1
         
         message = {
             "type": "answer",
@@ -199,56 +225,114 @@ class ClientEntity:
             "answer": answer_num
         }
         self.sock.send(json.dumps(message).encode())
-        self.current_round = -1
     
     def handle_correct_answer(self, data):
         correct_answ = data["correct_answ"]
         curr_score = data["curr_score"]
         deleted_players = data["deleted_players"]
         
-        # Определяем, правильно ли ответил клиент
-        your_res = self.last_answer == correct_answ  # Сравниваем последний ответ клиента с правильным ответом
-        
-        print(f"Правильный ответ: {correct_answ}")
-        print(f"Ваш результат: {'Верно' if your_res else 'Неверно'}")
-        #удалить удалённых игроков из списка игроков
+        # ⭐️ Определяем, правильно ли ответил клиент
+        if (self.last_answer != None):
+            your_res = self.last_answer == correct_answ  # ⭐️ Сравниваем последний ответ клиента с правильным ответом
+        else:
+            your_res = False
+        if self.last_answer == None:
+            y_ans = "–"
+        else:
+            y_ans = self.last_answer
+        if your_res:
+            res = "✅"
+        else:
+            res = "❌"
+        print()
+        print("┌─────────────┬───┬────────────────┬───┬────────┬──┐")
+        print(f"│ Your Answer │ {y_ans:^1} │ Correct Answer │ {correct_answ:^1} │ Result │{res}│")
+        print("└─────────────┴───┴────────────────┴───┴────────┴──┘")
+        print()
+        # ⭐️ Удалить удалённых игроков из списка игроков
         if deleted_players != None:
             for pair in deleted_players:
-                # 'deleted_players': [{'id': player_id, 'score': score} for player_id, score in self.deleted_players.items()] 
                 player_id = pair['id']
                 if player_id in self.players:
                     self.players.remove(player_id)
-        print("Текущий счет:")
+        
+        mark_res = {}
+        if self.current_round == 0:
+            for i, score in enumerate(curr_score):
+                if score == 0:
+                    mark_res[self.players[i]] = "❌"
+                else:
+                    mark_res[self.players[i]] = "✅"
+            if deleted_players:
+                for pair in deleted_players:
+                    if pair['score'] == 0:
+                        mark_res[pair['id']] = "❌"
+                    else:
+                        mark_res[pair['id']] = "✅"
+        else:
+            for i, score in enumerate(curr_score):
+                if self.prev_results[self.players[i]] == score:
+                    mark_res[self.players[i]] = "❌"
+                else:
+                    mark_res[self.players[i]] = "✅"
+            if deleted_players:
+                for pair in deleted_players:
+                    if self.prev_results[pair['id']] == pair['score']:
+                        mark_res[pair['id']] = "❌"
+                    else:
+                        mark_res[pair['id']] = "✅"
+        self.all_marks[self.current_round] = mark_res
+        
         for i, score in enumerate(curr_score):
-            print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
-        if deleted_players != None:
-            print("Игроки, которые отключились:")
+            self.prev_results[self.players[i]] = score
+        if deleted_players:
             for pair in deleted_players:
-                print(f"Игрок {self.get_name(pair['id'])}: {pair['score']} очков")
+                self.prev_results[pair['id']] = pair['score']
+
+        print("┌──────────────────────────────────────────────────┐")
+        print("│                 CURRENT RESULTS                  │")
+        print("├──────────────┬────┬────┬────┬────┬────┬──────────┤")
+        for i, score in enumerate(curr_score):
+            print(f"│{self.get_name(self.players[i]):^14}│ {"––" if self.all_marks[0] == None else self.all_marks[0][self.players[i]]} │ {"––" if self.all_marks[1] == None else self.all_marks[1][self.players[i]]} │ {"––" if self.all_marks[2] == None else self.all_marks[2][self.players[i]]} │ {"––" if self.all_marks[3] == None else self.all_marks[3][self.players[i]]} │ {"––" if self.all_marks[4] == None else self.all_marks[4][self.players[i]]} │{score:^10}│")
+            if i != len(curr_score) - 1:
+                print("├──────────────┼────┼────┼────┼────┼────┼──────────┤")
+            elif i == len(curr_score) - 1 and not deleted_players:
+                print("└──────────────┴────┴────┴────┴────┴────┴──────────┘")
+            else:
+                print("├──────────────┴────┴────┴────┴────┴────┴──────────┤") 
+        if deleted_players:
+            print("│              DISCONNECTED PLAYERS                │")
+            print("├──────────────┬────┬────┬────┬────┬────┬──────────┤")
+            for pair in deleted_players:
+                print(f"│{self.get_name(pair['id']):^14}│ {"––" if self.all_marks[0] == None else self.all_marks[0][pair['id']]} │ {"––" if self.all_marks[1] == None else self.all_marks[1][pair['id']]} │ {"––" if self.all_marks[2] == None else self.all_marks[2][pair['id']]} │ {"––" if self.all_marks[3] == None else self.all_marks[3][pair['id']]} │ {"––" if self.all_marks[4] == None else self.all_marks[4][pair['id']]} │{pair['score']:^10}│")
+                if deleted_players.index(pair) != len(deleted_players) - 1:
+                    print("├──────────────┼────┼────┼────┼────┼────┼──────────┤")
+                elif deleted_players.index(pair) == len(deleted_players) - 1:
+                    print("└──────────────┴────┴────┴────┴────┴────┴──────────┘")
 
     def handle_end_game(self, data):
-        print("\nИгра окончена!")
-        print("Финальный счет:")
+        print("\n\n\n")
+        print("- - - - - - - - - - - - - - - - - - - - - - - - - - ")
+        print("🏁                The Game Is Over!               🏁")
+        print("- - - - - - - - - - - - - - - - - - - - - - - - - - ")
+        print()
         max_score = max(data["curr_score"])
-        winners = [i for i, score in enumerate(data["curr_score"]) if score == max_score]   # ⭐️ проверить как эта строчка работает
-        
-        for i, score in enumerate(data["curr_score"]):                                  # ⭐️ сделать красивую табличку + измеить число на цвет
-            # ⭐️ UPD (нужно проверить в каком порядке сервер отправляет результаты)
-            print(f"Игрок {self.get_name(self.players[i])}: {score} очков")
+        winners = [i for i, score in enumerate(data["curr_score"]) if score == max_score]
         
         if len(winners) == 1:
-            print(f"Победил игрок {self.get_name(self.players[winners[0]])}!")    # ⭐️ сделать вывод через цвет
+            print(f"               🏆 Player {self.get_name(self.players[winners[0]])} WIN!\n\n")
         else:
             for i in winners:
                 winners[i] = self.get_name(self.players[i])
-            print("Ничья между игроками:", ", ".join(map(str, winners)))
+            print("🏆 Draw Between:", ", ".join(map(str, winners)))
+            print()
         
         self.running = False
 
     def receive_messages(self):
         while self.running:
             try:
-                data = self.sock.recv(8192)      # ⭐️ изменить буфер
+                data = self.sock.recv(8192)
                 if not data:
                     break
                 message = json.loads(data.decode())
@@ -265,13 +349,12 @@ class ClientEntity:
                     self.handle_end_game(message)
                 
             except json.JSONDecodeError:
-                print("Ошибка декодирования сообщения от сервера") # ⭐️ возможно надо отослать серверу?
-                print(f"Полученные данные: {data.decode()}")
+                print("Failed to decode server message")
             except ConnectionResetError:
-                print("Соединение с сервером разорвано")
+                print("Connection to server lost")
                 self.running = False
             except Exception as e:
-                print(f"Неизвестная ошибка: {e}")
+                print(f"Unknown error: {e}")
                 self.running = False
 
     def cleanup(self):
@@ -286,7 +369,7 @@ def main():
         while client.running:
             time.sleep(0.1)
     except KeyboardInterrupt:
-        print("\nИгра прервана пользователем")
+        print("\n🚫 Game interrupted by user")
     finally:
         client.cleanup()
 
