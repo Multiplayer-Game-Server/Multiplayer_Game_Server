@@ -31,7 +31,8 @@ The project was created as part of an academic project activity in which student
 - Each question is given 30 seconds to answer.
 - The game automatically calculates player rankings.
 - Each player has a unique nickname with color.
-
+- Using numbers other than 1-4 as the answer to a question is automatically considered incorrect.
+  
 ## ⚙️ Requirements
 - Python 3.7+
 - No additional requirements 
@@ -64,5 +65,5 @@ python ./client.py
     * **Create Game:** selecting this option creates a new game that new players can join.
     * **Connect to the game:** when this option is selected, the player is prompted to enter the id of the room he wants to connect to. If the connection is successful, he will be added to the room
 - After you have connected to the room, you can wait for new players or press ENTER to switch to ready status. 
-- After all players are ready, the round begins with a question and 4 answer choices. Use the numbers 1-4 to choose the answer. After the timer expires or after everyone has answered, the terminal will display the rating, the result of your answer and the next question. 
+- After all players are ready, the round begins with a question and 4 answer choices. Use the numbers 1-4 to choose the answer. Using numbers other than 1-4 is automatically considered incorrect and you get 0 for the round. After the timer expires or after everyone has answered, the terminal will display the rating, the result of your answer and the next question. 
 - After 5 rounds the winner will be declared and the game will automatically end.
