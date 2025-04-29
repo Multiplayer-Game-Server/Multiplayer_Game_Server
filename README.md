@@ -14,7 +14,7 @@ The project was created as part of an academic project activity in which student
 ## 🚀 Project features
 - Client-server communication is implemented in the project.
 - The program works on TCP protocol of transport level.
-- Terminal Game.
+- Terminal Game (Running the client through the terminal).
 - Default server settings:
     - **ip adress:** 0.0.0.0
     - **Port:** 20250
@@ -57,7 +57,7 @@ All players should have *client.py* file.
 git clone https://github.com/Multiplayer-Game-Server/Multiplayer_Game_Server.git
 cd ./Multiplayer_Game_Server
 ```
-- Start a client on one of the host
+- Start a client on one of the host (Running the client through the terminal):
 ```bash
 python ./client.py
 ```
