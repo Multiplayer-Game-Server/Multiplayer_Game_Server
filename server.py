@@ -38,7 +38,7 @@ class Game:
         self.questions = self.get_questions()
         self.lock = threading.RLock() # Lock for thread safety
         self.number_of_rounds = 5 # Number of rounds in the game
-        self.delay_between_questions = 3 # Delay between questions
+        self.delay_between_questions = 6 # Delay between questions
         self.round_time_limit = 40  # Time limit for each question in seconds
 
     
