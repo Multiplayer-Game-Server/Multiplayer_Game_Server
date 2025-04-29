@@ -2,11 +2,11 @@
 
 Multiuser quiz with a Python server using sockets. Players answer questions related to it industry and compete for the best result.
 ## 🔍 Description
-- [📄 About the project](#📄-About-the-project): in this section you will find a brief description of the project.
-- [🚀 Project features](#Project-features): in this section you will find the specifics of the project implementation 
-- [🎯 Game Mechanics](#Game-Mechanics): in this section you will find the features of the game's implementation.
-- [⚙️ Requirements](#Requirements): in this section you will find the necessary resources that must be installed in order for the program to work .
-- [💿 How to use the program](#💿-How-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
+- [📄 About the project](#about-the-project): in this section you will find a brief description of the project.
+- [🚀 Project features](#project-features): in this section you will find the specifics of the project implementation 
+- [🎯 Game Mechanics](#game-mechanics): in this section you will find the features of the game's implementation.
+- [⚙️ Requirements](#requirements): in this section you will find the necessary resources that must be installed in order for the program to work .
+- [💿 How to use the program](#how-to-use-the-program): in this section you will find a description of how to start the server and how to start the game, as well as how to use the game.
 
 ## 📄 About the project
 The project was created as part of an academic project activity in which students demonstrate their proficiency with sockets in Python, threads in Python, and synchronizing multiple clients and a server.
@@ -27,7 +27,7 @@ The project was created as part of an academic project activity in which student
 
 ## 🎯 Game Mechanics
 - Each game consists of 5 rounds.
-- Each round contains 4 types of answers.
+- Each round contains 4 options of answers.
 - Each question is given 30 seconds to answer.
 - The game automatically calculates player rankings.
 - Each player has a unique nickname with color.
