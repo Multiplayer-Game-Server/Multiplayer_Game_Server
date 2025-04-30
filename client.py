@@ -135,17 +135,22 @@ class ClientEntity:
         def input_thread():
             print("Ваш ответ (1-4):")
 
-            rlist, _, _ = select.select([sys.stdin], [], [], 30.0)
-    
-            if not rlist:  # ⭐️ Если время вышло
+            def timeout():
                 print("\nВремя вышло! Ответ не принят.")
-                return
 
-            answer = sys.stdin.readline().rstrip('\n')
-            if answer in ["1", "2", "3", "4"]:
-                self.final_answer = answer
-            else:
-                print("Ответ не будет засчитан")
+            timer = threading.Timer(30.0, timeout)
+            timer.start()
+
+            try:
+                answer = input().strip()
+                if answer in ["1", "2", "3", "4"]:
+                    self.final_answer = answer
+                else:
+                    print("Ответ не будет засчитан")
+            except Exception as e:
+                print(f"Ошибка ввода: {e}")
+            finally:
+                timer.cancel()
 
         thread = threading.Thread(target=input_thread)
         thread.daemon = True
