@@ -395,32 +395,48 @@ class ClientEntity:
 
     def receive_messages(self):
         '''Function for recieving ALL messages from the server'''
+        buffer = b""
         while self.running:
             try:
-                # Receive messages from the server
+                # Receive data from the server
                 data = self.sock.recv(8192)
                 if not data:
                     break
-                message = json.loads(data.decode())
                 
-                # Handle messages
-                if message["type"] == "status":             # To get response after creating new game room or joining to existing
-                    self.handle_status(message)
-                elif message["type"] == "new player":       # To get message about new player, that join to the game room
-                    self.handle_new_player(message)
-                elif message["type"] == "question":         # To get question information from the server
-                    self.handle_question(message)
-                elif message["type"] == "correct answer":   # To get message about correct answer
-                    self.handle_correct_answer(message)
-                elif message["type"] == "end game":         # To get message about end game
-                    self.handle_end_game(message)
+                buffer += data
                 
-            except json.JSONDecodeError:
-                print("Failed to decode server message")
+                # Process all complete messages in the buffer and split them by "\n"
+                while b'\n' in buffer:
+                    message_part, buffer = buffer.split(b'\n', 1)
+                    if not message_part:
+                        continue
+                        
+                    try:
+                        message = json.loads(message_part.decode())
+                        
+                        # Handle messages
+                        if message["type"] == "status":
+                            self.handle_status(message)             # To get response after creating new game room or joining to existing
+                        elif message["type"] == "new player":
+                            self.handle_new_player(message)         # To get message about new player, that join to the game room
+                        elif message["type"] == "question":
+                            self.handle_question(message)           # To get question information from the server
+                        elif message["type"] == "correct answer":
+                            self.handle_correct_answer(message)     # To get message about correct answer
+                        elif message["type"] == "end game":
+                            self.handle_end_game(message)           # To get message about end game
+                            
+                    except json.JSONDecodeError as e:
+                        print(f"Failed to decode server message: {e}")
+                        print(f"Raw message: {message_part}")
+                        self.running = False
+                        break
+                        
             except ConnectionResetError:
                 print("Connection to server lost")
                 self.running = False
             except Exception as e:
+                print(f"Unexpected error: {e}")
                 self.running = False
 
     def cleanup(self):
