@@ -66,7 +66,7 @@ class Game:
             for p in self.players:
                 if p != player:  
                     try:
-                        p.socket.send(json.dumps(new_player_message).encode())
+                        p.socket.send((json.dumps(new_player_message) + '\n').encode())
                     except Exception as e:
                         print(f"Error sending 'new player' message to {p.address}: {e}")
                         self.handle_disconnect(p)
@@ -157,7 +157,7 @@ class Game:
             'question': self.current_question['question'],
             'options': self.current_question['options']
         }
-        self.broadcast(json.dumps(question_data))
+        self.broadcast(json.dumps(question_data) + '\n')
 
 
     # function for processing the player's answer
@@ -203,7 +203,7 @@ class Game:
                 'deleted_players': [{'id': player_id, 'score': score} for player_id, score in self.deleted_players.items()] 
             }
             
-            self.broadcast(json.dumps(response))
+            self.broadcast(json.dumps(response) + '\n')
             
             # transition to the next round or end the game
             if self.current_round >= self.number_of_rounds:
@@ -249,7 +249,7 @@ class Game:
             }
 
             # Broadcast the results to all players
-            self.broadcast(json.dumps(results))
+            self.broadcast(json.dumps(results) + '\n')
             
             # Close all player connections
             self.close_connection_players(self.players)
@@ -274,7 +274,7 @@ class Game:
     def broadcast(self, message):
         """ The function sends a message to all players """ 
         if not isinstance(message, str):    # Convert dict to JSON string if needed
-            message = json.dumps(message)
+            message = json.dumps(message) + '\n'
 
         for player in self.players:
             try:
@@ -391,7 +391,7 @@ class Server:
                         "game_id": game_id,
                         "list_of_players": [player_id]
                     }
-                    client_socket.send(json.dumps(answer).encode())
+                    client_socket.send((json.dumps(answer) + '\n').encode())
                     break
                 # If there was a request to connect to the game, 
                 # try to connect the player to the game and send the corresponding response 
@@ -405,7 +405,7 @@ class Server:
                             "game_id": None, 
                             "list_of_players": []
                         }
-                        client_socket.send(json.dumps(error_message).encode())
+                        client_socket.send((json.dumps(error_message) + '\n').encode())
                         print(f"Player {client_addr[0]}:{client_addr[1]} tried to connect to a non-existent game {game_id}.")
                         continue # if connection to the game fails, continue the cycle so that the client can try again
 
@@ -417,7 +417,7 @@ class Server:
                         "game_id": game_id,
                         "list_of_players": list_players
                     }
-                    client_socket.send(json.dumps(answer).encode())
+                    client_socket.send((json.dumps(answer) + '\n').encode())
                     break  
                 # If the message is of unknown type
                 else:
