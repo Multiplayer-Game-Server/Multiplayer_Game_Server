@@ -114,17 +114,20 @@ class ClientEntity:
 
     def wait_for_ready(self):
         def receive_players():
-            while self.wait_ready:
-                data = self.sock.recv(8192)
-                if not data:
-                    break
-                message = json.loads(data.decode())
-                if message["type"] == "new player":
-                    self.handle_new_player(message)
-                elif message["type"] == "question":
-                    self.handle_question(message)
-                else:
-                    print("Вы попали...")
+            try:
+                while self.wait_ready:
+                    data = self.sock.recv(8192)
+                    if not data:
+                        break
+                    message = json.loads(data.decode())
+                    if message["type"] == "new player":
+                        self.handle_new_player(message)
+                    elif message["type"] == "question":
+                        self.handle_question(message)
+                    else:
+                        print("Вы попали...")
+            except Exception as e:
+                self.running = False
 
         self.wait_ready = True
         thread = threading.Thread(target=receive_players)
@@ -293,7 +296,15 @@ class ClientEntity:
         print("│                 CURRENT RESULTS                  │")
         print("├──────────────┬────┬────┬────┬────┬────┬──────────┤")
         for i, score in enumerate(curr_score):
-            print(f"│{self.get_name(self.players[i]):^14}│ {"––" if self.all_marks[0] == None else self.all_marks[0][self.players[i]]} │ {"––" if self.all_marks[1] == None else self.all_marks[1][self.players[i]]} │ {"––" if self.all_marks[2] == None else self.all_marks[2][self.players[i]]} │ {"––" if self.all_marks[3] == None else self.all_marks[3][self.players[i]]} │ {"––" if self.all_marks[4] == None else self.all_marks[4][self.players[i]]} │{score:^10}│")
+            print(
+                f"│{self.get_name(self.players[i]):^14}│ "
+                f"{'--' if self.all_marks[0] is None else self.all_marks[0][self.players[i]]} │ "
+                f"{'--' if self.all_marks[1] is None else self.all_marks[1][self.players[i]]} │ "
+                f"{'--' if self.all_marks[2] is None else self.all_marks[2][self.players[i]]} │ "
+                f"{'--' if self.all_marks[3] is None else self.all_marks[3][self.players[i]]} │ "
+                f"{'--' if self.all_marks[4] is None else self.all_marks[4][self.players[i]]} │"
+                f"{score:^10}│"
+            )
             if i != len(curr_score) - 1:
                 print("├──────────────┼────┼────┼────┼────┼────┼──────────┤")
             elif i == len(curr_score) - 1 and not deleted_players:
@@ -304,7 +315,15 @@ class ClientEntity:
             print("│              DISCONNECTED PLAYERS                │")
             print("├──────────────┬────┬────┬────┬────┬────┬──────────┤")
             for pair in deleted_players:
-                print(f"│{self.get_name(pair['id']):^14}│ {"––" if self.all_marks[0] == None else self.all_marks[0][pair['id']]} │ {"––" if self.all_marks[1] == None else self.all_marks[1][pair['id']]} │ {"––" if self.all_marks[2] == None else self.all_marks[2][pair['id']]} │ {"––" if self.all_marks[3] == None else self.all_marks[3][pair['id']]} │ {"––" if self.all_marks[4] == None else self.all_marks[4][pair['id']]} │{pair['score']:^10}│")
+                print(
+                    f"│{self.get_name(pair['id']):^14}│ "
+                    f"{'--' if self.all_marks[0] is None else self.all_marks[0][pair['id']]} │ "
+                    f"{'--' if self.all_marks[1] is None else self.all_marks[1][pair['id']]} │ "
+                    f"{'--' if self.all_marks[2] is None else self.all_marks[2][pair['id']]} │ "
+                    f"{'--' if self.all_marks[3] is None else self.all_marks[3][pair['id']]} │ "
+                    f"{'--' if self.all_marks[4] is None else self.all_marks[4][pair['id']]} │"
+                    f"{pair['score']:^10}│"
+                )
                 if deleted_players.index(pair) != len(deleted_players) - 1:
                     print("├──────────────┼────┼────┼────┼────┼────┼──────────┤")
                 elif deleted_players.index(pair) == len(deleted_players) - 1:
@@ -354,7 +373,6 @@ class ClientEntity:
                 print("Connection to server lost")
                 self.running = False
             except Exception as e:
-                print(f"Unknown error: {e}")
                 self.running = False
 
     def cleanup(self):
