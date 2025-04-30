@@ -231,7 +231,6 @@ class ClientEntity:
         thread.join()
         print("====================================================")
         
-        
         if self.final_answer is None:
             # If the user didn't answer within 30 seconds —> send timeout answer
             self.send_timeout_answer()
